@@ -37,9 +37,13 @@ extern "C" {
 		struct tree *left, *right;
 	}ExpTree;
 
-	typedef uint8_t BOOL;
-#define TRUE  (1)
-#define FALSE (0)
+#ifndef BOOL
+
+	#define BOOL uint8_t
+    #define TRUE  (1)
+    #define FALSE (0)
+
+#endif
 
 	ExpTree *build_exp_tree(char const * _infix_exp);
 	BOOL calc_exp_tree(ExpTree *);

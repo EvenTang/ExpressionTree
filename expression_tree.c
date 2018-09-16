@@ -70,11 +70,11 @@ static BOOL is_any_of(char c, char const * _p_str) {
 static BOOL is_sub_set_character_of(char const * p_target, char const * _p_set) {
 	char const * p = p_target;
 	for (; *p != '\0'; ++p) {
-		if (is_any_of(*p, _p_set)) {
-			return TRUE;
+		if (is_any_of(*p, _p_set) == FALSE) {
+			return FALSE;
 		}
 	}
-	return FALSE;
+	return TRUE;
 }
 
 static BOOL is_hex_str(char const * _p_num) {
@@ -282,22 +282,22 @@ static uint8_t priority(char const * _str)
 		uint8_t pri;
 	} *p_table, token_patters[] = {
 		{ ")",	0 },
-		{ ">",	1 },
-		{ ">=",	1 },
-		{ "<",	1 },
-		{ "<=",	1 },
-		{ "==",	1 },
-		{ "!=",	1 },
-		{ "&",  2 },
-		{ "|",	2 },
-		{ "+",	2 },
-		{ "-",	2 },
-		{ "*",	3 },
-		{ "/",	3 },
-		{ "%",	3 },
-		{ "||",	4 },
-		{ "&&",	4 },
-		{ "(",	5 },
+		{ "+",	1 },
+		{ "-",	1 },
+		{ "*",	2 },
+		{ "/",	2 },
+		{ "%",	2 },
+		{ "&",  3 },
+		{ "|",	3 },
+		{ ">",	4 },
+		{ ">=",	4 },
+		{ "<",	4 },
+		{ "<=",	4 },
+		{ "==",	5 },
+		{ "!=",	5 },
+		{ "||",	6 },
+		{ "&&",	6 },
+		{ "(",	7 },
 	    { NULL, 0 }
 	};
 	p_table = token_patters;
@@ -348,6 +348,9 @@ static void infix_to_postfix_token_list(char const * _exp_str, char * _postfix_t
 					}
 					stack_top--;
 				}
+				else if (strcmp(*p_token, "(") == 0) {
+					operatorstack[stack_top++] = *p_token;
+				}
 				else
 				{
 					auto curpri = priority(*p_token);
@@ -355,7 +358,8 @@ static void infix_to_postfix_token_list(char const * _exp_str, char * _postfix_t
 						char const * top = operatorstack[stack_top-1];
 						int toppor = priority(top);
 
-						if ((curpri <= toppor) && (strcmp(top, "(") != 0)) {
+						// small value means high priority
+						if ((curpri >= toppor) && (strcmp(top, "(") != 0)) {
 							_postfix_tokens[postfix_tokens_count] = (char *)malloc_clean_mem(strlen(top) + 1);
 							strcpy(_postfix_tokens[postfix_tokens_count], top);
 							postfix_tokens_count++;
